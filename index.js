@@ -37,9 +37,13 @@ io.on('connection', (socket) => {
   socket.on('chat message', msg => {
     io.emit('chat message', msg);
   });
-  socket.on('prueba', coord => {
+  socket.on('punto', coord => {
     const color = socketColors.get(socket.id);
-    io.local.emit('prueba',coord, color)
+    io.local.emit('punto',coord, color)
+  });
+  socket.on('linea', coord => {
+    const color = socketColors.get(socket.id);
+    io.local.emit('linea',coord, color)
   });
 });
 

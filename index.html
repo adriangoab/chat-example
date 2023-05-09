@@ -25,6 +25,13 @@
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form> -->
+    <div>
+      <select id="seleccion" name="seleccion">
+        <option disabled selected>Elige una opcion</option>
+        <option value="1">Linia</option>      
+        <option value="2">Punto</option>      
+      </select>
+    </div>    
     <canvas id="canvas" height="400" width="400"></canvas>
     <script src="/socket.io/socket.io.js"></script>
 
@@ -32,39 +39,45 @@
       var socket = io();
       let canvas = document.getElementById('canvas')
       let ctx = canvas.getContext('2d')
-      // var messages = document.getElementById('messages');
-      // var form = document.getElementById('form');
-      // var input = document.getElementById('input');
+      let iniX = 0
+      let iniY = 0
 
-      canvas.addEventListener('click', function(e) {
-        let x = e.offsetX
-        let y = e.offsetY
-        let array = [x,y]
-        socket.emit('prueba', array)
+      canvas.addEventListener('mousedown', function (e) {
+        if (document.getElementById('seleccion').value == '1') {
+          iniX = e.offsetX
+          iniY = e.offsetY
+        }
+			})
+      canvas.addEventListener('mouseup', function(e) {
+        if (document.getElementById('seleccion').value == '1') {	
+          let array = [iniX, iniY, e.offsetX, e.offsetY]					          
+          socket.emit('linea', array)
+        } 
       })
 
-      socket.on('prueba', function (cord, color) {
+      canvas.addEventListener('click', function(e) {
+        if (document.getElementById('seleccion').value == '2') {
+          let x = e.offsetX
+          let y = e.offsetY
+          let array = [x,y]
+          socket.emit('punto', array)
+        }  
+      })
+
+      socket.on('punto', function (cord, color) {        
         ctx.beginPath()
         ctx.arc(cord[0], cord[1], 10, 0, 2*Math.PI, false)
         ctx.closePath()
         ctx.fillStyle = color
-        ctx.fill()
+        ctx.fill()       
       })
-
-      // form.addEventListener('submit', function(e) {
-      //   e.preventDefault();
-      //   if (input.value) {
-      //     socket.emit('chat message', input.value);
-      //     input.value = '';
-      //   }
-      // });
-
-      // socket.on('chat message', function(msg) {
-      //   var item = document.createElement('li');
-      //   item.textContent = msg;
-      //   messages.appendChild(item);
-      //   window.scrollTo(0, document.body.scrollHeight);
-      // });
+      socket.on('linea', function (cord, color) {        
+        ctx.beginPath()
+        ctx.moveTo(cord[0], cord[1])
+        ctx.lineTo(cord[2], cord[3])        
+        ctx.strokeStyle = color
+        ctx.stroke()       
+      })
     </script>
   </body>
 </html>
