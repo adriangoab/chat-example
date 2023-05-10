@@ -21,26 +21,27 @@
     </style>
   </head>
   <body>
-    <!-- <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
-    </form> -->
+    <h1>Bienvenido a la sala: <%= room %></h1>
     <div>
-      <select id="seleccion" name="seleccion">
+    <select id="seleccion" name="seleccion">
         <option disabled selected>Elige una opcion</option>
         <option value="1">Linia</option>      
         <option value="2">Punto</option>      
-      </select>
+    </select>
     </div>    
     <canvas id="canvas" height="400" width="400"></canvas>
+    
     <script src="/socket.io/socket.io.js"></script>
-
     <script>
       var socket = io();
       let canvas = document.getElementById('canvas')
       let ctx = canvas.getContext('2d')
       let iniX = 0
       let iniY = 0
+
+      document.getElementById('crear').addEventListener('click', function (e) {
+        socket.emit('createRoom', document.getElementById('sala').value);
+      })
 
       canvas.addEventListener('mousedown', function (e) {
         if (document.getElementById('seleccion').value == '1') {

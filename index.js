@@ -1,7 +1,12 @@
 const app = require('express')();
+var path = require('path');
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const port = process.env.PORT || 3000;
+
+const availableRooms = [];
 
 const colores = color = new Array ('#000000','#000080','#00008B','#0000CD','#0000FF',
 '#006400','#008000','#008B8B','#00BFFF','#00FF00',
@@ -27,7 +32,7 @@ const colores = color = new Array ('#000000','#000080','#00008B','#0000CD','#000
 const socketColors = new Map();
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+  res.render('index',{ rooms: availableRooms});
 });
 
 io.on('connection', (socket) => {
@@ -44,6 +49,12 @@ io.on('connection', (socket) => {
   socket.on('linea', coord => {
     const color = socketColors.get(socket.id);
     io.local.emit('linea',coord, color)
+  });
+  socket.on('createRoom', (room) => {
+    // Unir al cliente a la sala correspondiente
+    availableRooms.push(room)
+    socket.join(room)
+    socket.emit('mostrarPagina', '/views/room.ejs');
   });
 });
 
