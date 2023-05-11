@@ -36,12 +36,11 @@
     </div>    
     <canvas id="canvas" height="400" width="400"></canvas>
     <script src="/socket.io/socket.io.js"></script>
-    <h1>Create or Join a Room</h1>
+    <h1>Unete a una sala</h1>
     <form id="roomForm">
-      <label for="roomName">Room Name:</label>
+      <label for="roomName">Nombre de la sala:</label>
       <input type="text" id="roomName" name="roomName"><br>
-      <button type="submit" name="action" value="create">Create Room</button>
-      <button type="submit" name="action" value="join">Join Room</button>
+      <button type="submit" name="action" value="join">Unirse</button>
     </form>
 
     <script>
@@ -107,11 +106,7 @@
         e.preventDefault();
         let roomName = document.getElementById('roomName').value;
         let action = e.submitter.value;
-        if (action === 'create') {
-          socket.emit('createRoom', roomName);
-        } else if (action === 'join') {
-          socket.emit('joinRoom', roomName);
-        }
+        socket.emit('joinRoom', roomName);
       });
       socket.on('roomJoined', function (roomName) {
         document.getElementById('sala').innerHTML = roomName

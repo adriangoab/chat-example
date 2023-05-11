@@ -52,21 +52,13 @@ io.on('connection', (socket) => {
     io.emit('socketsConectados', numSocketsConectados);    
   });
 
-  socket.on('createRoom', (roomName) => {
-    console.log(`creating room ${roomName}`);
-    socket.join(roomName);
-    rooms.push(roomName);
-    socket.emit('roomCreated', roomName);
-  });
-
   socket.on('joinRoom', (roomName) => {
     console.log(`joining room ${roomName}`);
-    if (rooms.includes(roomName)) {
-      socket.join(roomName);
-      socket.emit('roomJoined', roomName);
-    } else {
-      socket.emit('roomNotFound', roomName);
+    if (!rooms.includes(roomName)) {
+      rooms.push(roomName);      
     }
+    socket.join(roomName);
+    socket.emit('roomJoined', roomName);
   });
 });
 
