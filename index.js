@@ -27,6 +27,7 @@ const colores = color = new Array ('#000000','#000080','#00008B','#0000CD','#000
 const socketColors = new Map();
 
 let numSocketsConectados = 0
+let rooms = []
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
@@ -38,20 +39,34 @@ io.on('connection', (socket) => {
   const colorIni = colores[Math.floor(Math.random() * 100)]
   socketColors.set(socket.id, colorIni)
 
-  socket.on('chat message', msg => {
-    io.emit('chat message', msg);
-  });
-  socket.on('punto', coord => {
+  socket.on('punto', (coord, sala) => {
     const color = socketColors.get(socket.id);
-    io.local.emit('punto',coord, color)
+    io.to(sala).emit('punto',coord, color)
   });
-  socket.on('linea', coord => {
+  socket.on('linea', (coord, sala) => {
     const color = socketColors.get(socket.id);
-    io.local.emit('linea',coord, color)
+    io.to(sala).emit('linea',coord, color)
   });
   socket.on('disconnect', () => {
     numSocketsConectados--;
     io.emit('socketsConectados', numSocketsConectados);    
+  });
+
+  socket.on('createRoom', (roomName) => {
+    console.log(`creating room ${roomName}`);
+    socket.join(roomName);
+    rooms.push(roomName);
+    socket.emit('roomCreated', roomName);
+  });
+
+  socket.on('joinRoom', (roomName) => {
+    console.log(`joining room ${roomName}`);
+    if (rooms.includes(roomName)) {
+      socket.join(roomName);
+      socket.emit('roomJoined', roomName);
+    } else {
+      socket.emit('roomNotFound', roomName);
+    }
   });
 });
 

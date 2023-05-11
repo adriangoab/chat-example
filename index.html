@@ -26,6 +26,7 @@
       <input id="input" autocomplete="off" /><button>Send</button>
     </form> -->
     <h1>Numero de Usuarios: <span id="socketsConectados"></span></h1>
+    <h1>Sala: <span id="sala"></span></h1>
     <div>
       <select id="seleccion" name="seleccion">
         <option disabled selected>Elige una opcion</option>
@@ -35,6 +36,13 @@
     </div>    
     <canvas id="canvas" height="400" width="400"></canvas>
     <script src="/socket.io/socket.io.js"></script>
+    <h1>Create or Join a Room</h1>
+    <form id="roomForm">
+      <label for="roomName">Room Name:</label>
+      <input type="text" id="roomName" name="roomName"><br>
+      <button type="submit" name="action" value="create">Create Room</button>
+      <button type="submit" name="action" value="join">Join Room</button>
+    </form>
 
     <script>
       var socket = io();
@@ -47,6 +55,7 @@
       socket.on('socketsConectados', (numSocketsConnected) => {
         document.getElementById('socketsConectados').innerHTML = numSocketsConnected;
       });
+
       canvas.addEventListener('mousedown', function (e) {
         if (document.getElementById('seleccion').value == '1') {
           iniX = e.offsetX
@@ -55,8 +64,13 @@
 			})
       canvas.addEventListener('mouseup', function(e) {
         if (document.getElementById('seleccion').value == '1') {	
-          let array = [iniX, iniY, e.offsetX, e.offsetY]					          
-          socket.emit('linea', array)
+          let array = [iniX, iniY, e.offsetX, e.offsetY]
+          if (document.getElementById('sala').innerText != "") {
+            socket.emit('linea', array, document.getElementById('sala').innerText)
+          } else {
+            console.log('tienes que entrar en alguna sala')
+          }		          
+          
         } 
       })
 
@@ -65,7 +79,11 @@
           let x = e.offsetX
           let y = e.offsetY
           let array = [x,y]
-          socket.emit('punto', array)
+          if (document.getElementById('sala').innerText != "") {
+            socket.emit('punto', array, document.getElementById('sala').innerText)
+          } else {
+            console.log('tienes que entrar en alguna sala')
+          }
         }  
       })
 
@@ -82,6 +100,21 @@
         ctx.lineTo(cord[2], cord[3])        
         ctx.strokeStyle = color
         ctx.stroke()       
+      })
+
+      let roomForm = document.getElementById('roomForm');
+      roomForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        let roomName = document.getElementById('roomName').value;
+        let action = e.submitter.value;
+        if (action === 'create') {
+          socket.emit('createRoom', roomName);
+        } else if (action === 'join') {
+          socket.emit('joinRoom', roomName);
+        }
+      });
+      socket.on('roomJoined', function (roomName) {
+        document.getElementById('sala').innerHTML = roomName
       })
     </script>
   </body>
