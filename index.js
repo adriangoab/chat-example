@@ -26,11 +26,15 @@ const colores = color = new Array ('#000000','#000080','#00008B','#0000CD','#000
 
 const socketColors = new Map();
 
+let numSocketsConectados = 0
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', (socket) => {
+  numSocketsConectados++
+  io.emit('socketsConectados', numSocketsConectados)
   const colorIni = colores[Math.floor(Math.random() * 100)]
   socketColors.set(socket.id, colorIni)
 
@@ -44,6 +48,10 @@ io.on('connection', (socket) => {
   socket.on('linea', coord => {
     const color = socketColors.get(socket.id);
     io.local.emit('linea',coord, color)
+  });
+  socket.on('disconnect', () => {
+    numSocketsConectados--;
+    io.emit('socketsConectados', numSocketsConectados);    
   });
 });
 

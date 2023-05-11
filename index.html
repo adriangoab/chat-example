@@ -25,6 +25,7 @@
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form> -->
+    <h1>Numero de Usuarios: <span id="socketsConectados"></span></h1>
     <div>
       <select id="seleccion" name="seleccion">
         <option disabled selected>Elige una opcion</option>
@@ -42,6 +43,10 @@
       let iniX = 0
       let iniY = 0
 
+
+      socket.on('socketsConectados', (numSocketsConnected) => {
+        document.getElementById('socketsConectados').innerHTML = numSocketsConnected;
+      });
       canvas.addEventListener('mousedown', function (e) {
         if (document.getElementById('seleccion').value == '1') {
           iniX = e.offsetX
