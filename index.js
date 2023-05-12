@@ -47,6 +47,10 @@ io.on('connection', (socket) => {
     const color = socketColors.get(socket.id);
     io.to(sala).emit('linea',coord, color)
   });
+  socket.on('arco', (coord, sala) => {
+    const color = socketColors.get(socket.id);
+    io.to(sala).emit('arco',coord, color)
+  });
   socket.on('disconnect', () => {
     numSocketsConectados--;
     io.emit('socketsConectados', numSocketsConectados);    

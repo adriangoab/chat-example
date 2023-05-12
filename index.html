@@ -32,6 +32,7 @@
         <option disabled selected>Elige una opcion</option>
         <option value="1">Linia</option>      
         <option value="2">Punto</option>      
+        <option value="3">Arco</option>      
       </select>
     </div>    
     <canvas id="canvas" height="400" width="400"></canvas>
@@ -59,18 +60,25 @@
         if (document.getElementById('seleccion').value == '1') {
           iniX = e.offsetX
           iniY = e.offsetY
+        } else if (document.getElementById('seleccion').value == '3'){
+          const rect = canvas.getBoundingClientRect();
+          iniX = e.clientX - rect.left;
+          iniY = e.clientY - rect.top;
         }
 			})
       canvas.addEventListener('mouseup', function(e) {
-        if (document.getElementById('seleccion').value == '1') {	
+        if (document.getElementById('seleccion').value == '1' || document.getElementById('seleccion').value == '3') {	
           let array = [iniX, iniY, e.offsetX, e.offsetY]
           if (document.getElementById('sala').innerText != "") {
-            socket.emit('linea', array, document.getElementById('sala').innerText)
+            if (document.getElementById('seleccion').value == '3') {
+              socket.emit('arco', array, document.getElementById('sala').innerText)
+            } else {
+              socket.emit('linea', array, document.getElementById('sala').innerText)
+            }            
           } else {
-            console.log('tienes que entrar en alguna sala')
-          }		          
-          
-        } 
+            alert('tienes que entrar en alguna sala')
+          }		                    
+        }
       })
 
       canvas.addEventListener('click', function(e) {
@@ -81,7 +89,7 @@
           if (document.getElementById('sala').innerText != "") {
             socket.emit('punto', array, document.getElementById('sala').innerText)
           } else {
-            console.log('tienes que entrar en alguna sala')
+            alert('tienes que entrar en alguna sala')
           }
         }  
       })
@@ -99,6 +107,16 @@
         ctx.lineTo(cord[2], cord[3])        
         ctx.strokeStyle = color
         ctx.stroke()       
+      })
+      
+      socket.on('arco', function (cord, color) {
+        const centerX = (cord[0] + cord[2]) / 2;
+        const centerY = (cord[1] + cord[3]) / 2;
+        const radius = Math.sqrt(Math.pow(cord[2] - cord[0], 2) + Math.pow(cord[3] - cord[1], 2)) / 2;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, Math.PI, 0, cord[0] > cord[2]);
+        ctx.strokeStyle = color
+        ctx.stroke();
       })
 
       let roomForm = document.getElementById('roomForm');
